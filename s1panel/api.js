@@ -1288,6 +1288,22 @@ function config_sensor_edit(context, request) {
     });
 }
 
+function set_language(context, request) {
+    return new Promise((fulfill, reject) => {
+        const newLang = request.language;
+        const supportedLangs = ['auto', 'en', 'es'];
+
+        if (typeof newLang === 'string' && supportedLangs.includes(newLang)) {
+            context.config.language = newLang;
+
+            return write_file(context.state.config_file, JSON.stringify(context.config, null, 3)).then(() => {
+                logger.info('api set_language: config.json updated');
+                fulfill({ status: 'success', language: newLang });
+            }, reject);
+        }
+        reject(new Error('Unsupported or invalid language code'));
+    });
+}
 
 function callback_wrapper(method, url, req, res, callback, type, context) {
 
@@ -1346,6 +1362,7 @@ module.exports.init = function(web, context) {
         { method: 'post', url: '/api/config_sensor_add',    type: 'application/json', callback: config_sensor_add },
         { method: 'post', url: '/api/config_sensor_remove', type: 'application/json', callback: config_sensor_remove },
         { method: 'post', url: '/api/config_sensor_edit',   type: 'application/json', callback: config_sensor_edit },
+        { method: 'post', url: '/api/set_language',         type: 'application/json', callback: set_language },
 
     ].forEach(each => {
 

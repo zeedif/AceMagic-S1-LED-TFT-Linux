@@ -606,6 +606,7 @@ function init_web_gui(state, config, theme) {
         const _ip = _listen[0];
         const _port = Number(_listen[1]);
 
+        _web.use('/locales', express.static(path.join(__dirname, 'gui/src/locales')));
         _web.use(express.static(path.join(__dirname, 'gui/dist')));
         _web.use(express.json());
 
