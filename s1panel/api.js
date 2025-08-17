@@ -916,12 +916,16 @@ function theme_delete(context, request) {
 
 function switch_theme(context, request) {
     return new Promise((fulfill, reject) => {
+        const { config, theme } = context;
         const themePath = request.config;
+
         read_file(path.join(home_dir, themePath)).then(themeBuffer => {
             const newTheme = JSON.parse(themeBuffer);
-            Object.keys(context.theme).forEach(key => delete context.theme[key]);
-            Object.assign(context.theme, newTheme);
-            context.config.theme = themePath;
+
+            Object.keys(theme).forEach(key => delete theme[key]);
+            Object.assign(theme, newTheme);
+
+            config.theme = themePath;
 
             context.state.update_orientation = true;
             context.state.force_redraw(context.state);
@@ -938,7 +942,6 @@ function theme_save(context) {
     return new Promise((fulfill, reject) => {
         const { state, config, theme } = context;
 
-        // 1. Procesar eliminaciones de temas pendientes
         if (state.pending_theme_deletions) {
             state.pending_theme_deletions.forEach(dirPath => {
                 fs.rm(dirPath, { recursive: true, force: true }, (err) => {
@@ -947,11 +950,9 @@ function theme_save(context) {
             });
         }
 
-        // 2. Limpiar estados pendientes
         state.pending_theme_creations = [];
         state.pending_theme_deletions = [];
 
-        // 3. Guardar el archivo del tema activo y el archivo de configuración global
         write_file(path.join(home_dir, config.theme), JSON.stringify(theme, (key, value) => '_private' === key ? undefined : value, 3))
             .then(() => write_file(state.config_file, JSON.stringify(config, null, 3)))
             .then(() => {
@@ -966,9 +967,8 @@ function theme_save(context) {
 
 function theme_revert(context) {
     return new Promise((fulfill, reject) => {
-        const { state } = context;
+        const { state, config, theme } = context;
 
-        // 1. Deshacer creaciones de temas pendientes eliminando sus directorios
         if (state.pending_theme_creations) {
             state.pending_theme_creations.forEach(dirPath => {
                 fs.rm(dirPath, { recursive: true, force: true }, (err) => {
@@ -977,21 +977,21 @@ function theme_revert(context) {
             });
         }
 
-        // 2. Limpiar todos los estados pendientes
         state.pending_theme_creations = [];
         state.pending_theme_deletions = [];
 
-        // 3. Recargar config.json desde el disco para restaurar el estado original
         read_file(state.config_file).then(savedConfigBuffer => {
             const savedConfig = JSON.parse(savedConfigBuffer);
-            context.config = savedConfig; // Esto restaura theme_list y el tema activo
 
-            // 4. Recargar el archivo del tema activo desde el disco
+            Object.keys(config).forEach(key => delete config[key]);
+            Object.assign(config, savedConfig);
+
             read_file(path.join(home_dir, savedConfig.theme)).then(themeBuffer => {
                 const revertedTheme = JSON.parse(themeBuffer);
-                context.theme = revertedTheme;
 
-                // 5. Restablecer el estado de la aplicación
+                Object.keys(theme).forEach(key => delete theme[key]);
+                Object.assign(theme, revertedTheme);
+
                 state.update_orientation = true;
                 state.force_redraw(state);
                 state.screen_index = 0;
