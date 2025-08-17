@@ -243,11 +243,6 @@ function update_property(context, request) {
 
             const _value = _widget[request.key] = request.value;
 
-            if ('value' === request.key && _value.sensor) {
-
-                _widget.sensor = false;
-            }
-
             set_dirty(context);
 
             return fulfill({ value: _value });

@@ -701,7 +701,24 @@
                                                 </div>
                                                 <div v-else-if="item.name === 'value'">
 
-                                                    <Dropdown class="w-full sm:w-16rem" v-model="item.value" :options="sensors" optionValue="name" optionLabel="name" :placeholder="t('placeholders.sensorOrText')" editable @update:modelValue="onSensorChange(widget, item)"/>
+                                                    <InputGroup>
+                                                        <Dropdown
+                                                            class="w-full"
+                                                            v-model="item.value"
+                                                            :options="sensors"
+                                                            optionValue="name"
+                                                            optionLabel="name"
+                                                            :placeholder="t('placeholders.sensorOrText')"
+                                                            editable
+                                                            @update:modelValue="onSensorChange(widget, item)"
+                                                        />
+                                                        <InputGroupAddon v-if="isAmbiguousValue(item.value)" v-tooltip.top="t('tooltips.sensorToggle')">
+                                                            <InputSwitch
+                                                                v-model="widget.sensor"
+                                                                @update:modelValue="onSensorToggle(widget)"
+                                                            />
+                                                        </InputGroupAddon>
+                                                    </InputGroup>
 
                                                 </div>
                                                 <div v-else>
@@ -764,6 +781,14 @@
                                     </li>
                                 </ul>
 
+                                <!-- Value Mapping Section -->
+                                <div v-if="widget.sensor">
+                                    <ValueMapper 
+                                        v-model="widget.value_mapping" 
+                                        @update:modelValue="onWidgetValueMappingChange(widget)" 
+                                    />
+                                </div>
+
                             </AccordionTab>
 
                         </Accordion>
@@ -787,12 +812,22 @@
 import { FilterMatchMode } from 'primevue/api';
 import { useI18n } from 'vue-i18n';
 import api from '@/common/api';
+import ValueMapper from '@/components/ValueMapper.vue';
 
 function make_widget_table(widget, infos) {
 
     const _table = [];
 
     widget.setup = infos.find(each => { return widget.name === each.name; });
+
+    // Initialize value_mapping if it doesn't exist
+    if (!widget.value_mapping) {
+        widget.value_mapping = {
+            enabled: false,
+            rules: [],
+            else: ''
+        };
+    }
 
     Object.getOwnPropertyNames(widget).forEach(key => {
 
@@ -820,7 +855,7 @@ function make_widget_table(widget, infos) {
             }
         }
 
-        if (!key.startsWith('debug_') && key !== 'name' && key !== 'sensor' && key !== 'setup' && key !== 'id' && key !== 'group' && key !== 'table' && key !== 'font_string') {
+        if (!key.startsWith('debug_') && key !== 'name' && key !== 'sensor' && key !== 'setup' && key !== 'id' && key !== 'group' && key !== 'table' && key !== 'font_string' && key !== 'value_mapping') {
 
             _table.push(_obj);
         }
@@ -833,6 +868,9 @@ function make_widget_table(widget, infos) {
 
 export default {
 
+    components: {
+        ValueMapper
+    },
     setup() {
         const { t, locale, availableLocales } = useI18n();
         return { t, locale, availableLocales };
@@ -1121,6 +1159,21 @@ export default {
                 this.unsaved_changes = true;
             });
         },
+        onWidgetValueMappingChange(widget) {
+            // Ensure the value_mapping object exists with defaults
+            if (!widget.value_mapping) {
+                widget.value_mapping = {
+                    enabled: false,
+                    rules: [],
+                    else: ''
+                };
+            }
+            
+            // Save the value_mapping object to the backend
+            return api.update_property(this.screen.id, widget.id, 'value_mapping', widget.value_mapping).then(() => {
+                this.unsaved_changes = true;
+            });
+        },
         onSetBackground() {
 
             if (!this.edit_background.startsWith('#')) {
@@ -1146,19 +1199,34 @@ export default {
                 this.unsaved_changes = true;
             });
         },
-        onSensorChange(widget, item) {
-
-            const _is_sensor = this.sensors.find(each => { return each.name === item.value; });
-
-            var _promise = _is_sensor ?
-                api.set_sensor(this.screen.id, widget.id, _is_sensor.name) :
-                    api.update_property(this.screen.id, widget.id, item.name, item.value);
-
-            return _promise.then(response => {
-
-                widget.value = response.value;
+        isAmbiguousValue(value) {
+            if (!value || typeof value !== 'string') return false;
+            return this.sensors.some(sensor => sensor.name === value);
+        },
+        onSensorToggle(widget) {
+            return api.update_property(this.screen.id, widget.id, 'sensor', widget.sensor).then(() => {
                 this.unsaved_changes = true;
             });
+        },
+        onSensorChange(widget, item) {
+            const isValueInSensorList = this.sensors.some(s => s.name === item.value);
+
+            const likelySelectedFromList = !widget.sensor && isValueInSensorList;
+
+            if (likelySelectedFromList) {
+                widget.sensor = true;
+                return api.set_sensor(this.screen.id, widget.id, item.value).then(response => {
+                    widget.value = response.value;
+                    this.unsaved_changes = true;
+                });
+            } else {
+                widget.sensor = false;
+                return api.update_property(this.screen.id, widget.id, 'value', item.value).then(() => {
+                    api.update_property(this.screen.id, widget.id, 'sensor', false).then(() => {
+                        this.unsaved_changes = true;
+                    });
+                });
+            }
         },
         onFontChange(id, value) {
 

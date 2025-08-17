@@ -17,7 +17,11 @@
     "addWidget": "Add Widget",
     "addSensor": "Add Sensor Instance",
     "addScreen": "Add a New Screen",
-    "addTheme": "Add a New Theme"
+    "addTheme": "Add a New Theme",
+    "valueMapping": {
+      "addRule": "Add Rule",
+      "addCondition": "Add Condition"
+    }
   },
   "labels": {
     "active": "Active",
@@ -41,7 +45,24 @@
     "rectWidth": "Width (1 - {max})",
     "rectHeight": "Height (1 - {max})",
     "speed": "Speed",
-    "intensity": "Intensity"
+    "intensity": "Intensity",
+    "valueMapping": {
+      "enable": "Enable Value Mapping",
+      "rule": "Rule",
+      "if": "IF",
+      "then": "THEN",
+      "else": "DEFAULT",
+      "operators": {
+        "equals": "Equals",
+        "notEqual": "Not Equal",
+        "greaterThan": "Greater Than",
+        "lessThan": "Less Than",
+        "greaterOrEqual": "Greater or Equal",
+        "lessOrEqual": "Less or Equal",
+        "contains": "Contains",
+        "notEmpty": "Not Empty"
+      }
+    }
   },
   "placeholders": {
     "pickTheme": "Pick a Theme",
@@ -54,13 +75,20 @@
     "sensorOrText": "Sensor or Text",
     "chooseAnOption": "Choose an option",
     "screenName": "Screen name...",
-    "themeName": "Theme name..."
+    "themeName": "Theme name...",
+    "valueMapping": {
+      "operator": "Select an Operator",
+      "conditionValue": "Value to Compare",
+      "result": "Resulting Value",
+      "defaultValue": "Default Value"
+    }
   },
   "tooltips": {
     "moveTop": "Move Top",
     "moveUp": "Move Up",
     "moveDown": "Move Down",
-    "moveBottom": "Move Bottom"
+    "moveBottom": "Move Bottom",
+    "sensorToggle": "Toggle to use as a sensor reference"
   },
   "messages": {
     "unsavedChanges": "Unsaved",

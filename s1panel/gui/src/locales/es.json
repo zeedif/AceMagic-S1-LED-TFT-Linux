@@ -17,7 +17,11 @@
     "addWidget": "Añadir widget",
     "addSensor": "Añadir instancia de sensor",
     "addScreen": "Añadir pantalla",
-    "addTheme": "Añadir tema"
+    "addTheme": "Añadir tema",
+    "valueMapping": {
+      "addRule": "Añadir regla",
+      "addCondition": "Añadir condición"
+    }
   },
   "labels": {
     "active": "Activo",
@@ -41,7 +45,24 @@
     "rectWidth": "Ancho (1 - {max})",
     "rectHeight": "Alto (1 - {max})",
     "speed": "Velocidad",
-    "intensity": "Intensidad"
+    "intensity": "Intensidad",
+    "valueMapping": {
+      "enable": "Habilitar mapeo de valores",
+      "rule": "Regla",
+      "if": "SI",
+      "then": "ENTONCES",
+      "else": "POR DEFECTO",
+      "operators": {
+        "equals": "Es igual a",
+        "notEqual": "No es igual a",
+        "greaterThan": "Es mayor que",
+        "lessThan": "Es menor que", 
+        "greaterOrEqual": "Es mayor o igual a",
+        "lessOrEqual": "Es menor o igual a",
+        "contains": "Contiene",
+        "notEmpty": "No está vacío"
+      }
+    }
   },
   "placeholders": {
     "pickTheme": "Selecciona un tema",
@@ -54,13 +75,20 @@
     "sensorOrText": "Sensor o texto",
     "chooseAnOption": "Elige una opción",
     "screenName": "Nombre de la pantalla...",
-    "themeName": "Nombre del tema..."
+    "themeName": "Nombre del tema...",
+    "valueMapping": {
+      "operator": "Selecciona un operador",
+      "conditionValue": "Valor a comparar",
+      "result": "Valor resultante",
+      "defaultValue": "Valor por defecto"
+    }
   },
   "tooltips": {
     "moveTop": "Mover al inicio",
     "moveUp": "Subir",
     "moveDown": "Bajar",
-    "moveBottom": "Mover al final"
+    "moveBottom": "Mover al final",
+    "sensorToggle": "Activar para usar como referencia a un sensor"
   },
   "messages": {
     "unsavedChanges": "Cambios sin guardar",
@@ -117,8 +145,6 @@
     },
     "ledStrip": {
       "header": "Tira LED",
-      "speed": "Velocidad",
-      "intensity": "Intensidad",
       "themes": {
         "rainbow": "Arcoíris",
         "breathing": "Respiración",
