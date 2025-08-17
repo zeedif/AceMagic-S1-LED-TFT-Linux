@@ -16,7 +16,8 @@
     "clear": "Limpiar",
     "addWidget": "Añadir widget",
     "addSensor": "Añadir instancia de sensor",
-    "addScreen": "Añadir pantalla"
+    "addScreen": "Añadir pantalla",
+    "addTheme": "Añadir tema"
   },
   "labels": {
     "active": "Activo",
@@ -64,7 +65,7 @@
   "messages": {
     "unsavedChanges": "Cambios sin guardar",
     "lostConnection": "Conexión perdida.",
-    "themeManagementComingSoon": "La gestión de temas estará disponible pronto.",
+    "confirmDeleteTheme": "¿Deseas eliminar este tema?",
     "confirmDeleteScreen": "¿Deseas eliminar esta pantalla?",
     "confirmDeleteWidget": "¿Deseas eliminar este widget?",
     "confirmClearWallpaper": "¿Limpiar fondo de pantalla?",
@@ -126,11 +127,6 @@
         "off": "Apagado",
         "unknown": "n/a"
       }
-    },
-    "confirmations": {
-      "areYouSure": "¿Estás seguro?",
-      "unsavedChanges": "¿Deseas guardar los cambios?",
-      "unsavedChangesMessage": "¡Cambiar de tema descartará cualquier cambio no guardado!."
     }
   },
   "card": {
@@ -192,8 +188,6 @@
     }
   },
   "confirmations": {
-    "areYouSure": "¿Estás seguro?",
-    "deleteThemeWarning": "Esta acción eliminará PERMANENTEMENTE el tema y todos los datos asociados, incluyendo las imágenes subidas.",
-    "deleteScreenQuestion": "¿Deseas eliminar esta pantalla?"
+    "areYouSure": "¿Estás seguro?"
   }
 }

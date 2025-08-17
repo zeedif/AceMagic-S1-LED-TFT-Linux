@@ -606,6 +606,27 @@ function api_set_language(lang) {
     });
 }
 
+function api_theme_create(name) {
+    return new Promise((fulfill, reject) => {
+        fetch('/api/theme_create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name })})
+        .then(res => res.json()).then(fulfill, reject);
+    });
+}
+
+function api_theme_delete(config) {
+    return new Promise((fulfill, reject) => {
+        fetch('/api/theme_delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config })})
+        .then(res => res.json()).then(fulfill, reject);
+    });
+}
+
+function api_switch_theme(config) {
+    return new Promise((fulfill, reject) => {
+        fetch('/api/switch_theme', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config })})
+        .then(res => res.json()).then(fulfill, reject);
+    });
+}
+
 export default {
     set_poll_time        : set_poll_time,
     fetch_config         : api_fetch_config,
@@ -645,5 +666,8 @@ export default {
     config_sensor_add    : api_config_sensor_add,
     config_sensor_remove : api_config_sensor_remove,
     config_sensor_edit   : api_config_sensor_edit,
-    set_language         : api_set_language
+    set_language         : api_set_language,
+    theme_create         : api_theme_create,
+    theme_delete         : api_theme_delete,
+    switch_theme         : api_switch_theme
 };

@@ -121,9 +121,7 @@
     </Dialog>
 
     <Dialog v-model:visible="theme_manage.show" maximizable modal :header="t('dialog.manageThemes.header')" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
-
         <div class="h-30rem">
-
             <DataTable ref="dt" :value="config.theme_list" dataKey="name"
                 :paginator="config.theme_list.length > 5"
                 :rows="10"
@@ -133,44 +131,37 @@
                 :currentPageReportTemplate="t('dialog.manageThemes.tableHeader')">
 
                 <template #header>
-                    <Message severity="info" :closable="false">{{ t('messages.themeManagementComingSoon') }}</Message>
-                    <!--
                     <div class="flex justify-content-start flex-wrap w-full gap-3 mb-3">
                         <div class="w-6">
-                            <label class="w-full text-sm" for="theme">Add a New Theme</label>
+                            <label class="w-full text-sm" for="themeName">{{ t('buttons.addTheme') }}</label>
                             <InputGroup>
-                                <InputText id="theme" placeholder="Theme name..." />
-                                <Button icon="pi pi-plus" severity="success" outlined></Button>
+                                <InputText id="themeName" v-model="theme_manage.name" :placeholder="t('placeholders.themeName')" />
+                                <Button icon="pi pi-plus" severity="success" outlined @click="onAddTheme()" :disabled="!theme_manage.name || !theme_manage.name.length"></Button>
                             </InputGroup>
                         </div>
                     </div>
-                    -->
                 </template>
 
                 <Column field="name" :header="t('labels.name')" sortable>
-
                     <template #body="row">
-
                         <div class="grid">
                             <div class="col-10">
-                                <div class="col-12 text-overflow-ellipsis">{{ row.data.name }} <Tag v-if="theme.id === row.data.id" class="ml-3" severity="info" :value="t('labels.active')" rounded></Tag></div>
-                                <div class="col-12 text-overflow-ellipsis">{{ row.data.config }}</div>
+                                <div class="col-12 text-overflow-ellipsis">
+                                    {{ row.data.name }}
+                                    <Tag v-if="edit_theme === row.data.config" class="ml-3" severity="info" :value="t('labels.active')" rounded></Tag>
+                                </div>
+                                <div class="col-12 text-overflow-ellipsis text-sm text-gray-500">{{ row.data.config }}</div>
                             </div>
-                            <div class="col-2">
-
-                                <Button size="small" text plain :disabled="true">
-                                    <i class="pi pi-trash mr-2" style="color: #ff0000"></i>{{ t('buttons.delete') }}
+                            <div class="col-2 flex align-items-center justify-content-center">
+                                <Button size="small" text plain @click="onDeleteTheme($event, row.data)" :disabled="config.theme_list.length <= 1 || edit_theme === row.data.config">
+                                    <i class="pi pi-trash" style="color: #ff0000"></i>
                                 </Button>
                             </div>
                         </div>
-
                     </template>
-
                 </Column>
             </DataTable>
-
         </div>
-
     </Dialog>
 
     <Dialog v-model:visible="sensor_manage.show" maximizable modal :header="t('dialog.sensorManage.header')" :style="{ width: '60rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
@@ -863,6 +854,7 @@ export default {
                 show: false,
                 selected: null,
                 filters: {},
+                name: null,
             },
             screen_manage: {
                 name: null,
@@ -1458,30 +1450,29 @@ export default {
             });
         },
         onThemeChange() {
-
-            if (this.config.theme_list.length > 1) {
-
-                return api.fetch_config_dirty().then(response => {
-
-                    if (response.unsaved_changes) {
-
-                        this.$confirm.require({
-                            group: 'headless2',
-                            header: this.t('dialog.confirmations.unsavedChanges'),
-                            message: this.t('dialog.confirmations.unsavedChangesMessage'),
-                            accept: () => {
-                                console.log('save changes and switch theme');
-                            },
-                            reject: () => {
-                                console.log('do nothing');
-                            }
-                        });
-                    }
-                    else {
-                        console.log('switch theme');
-                    }
-                });
+            if (this.edit_theme === this.config.theme) {
+                return;
             }
+
+            api.switch_theme(this.edit_theme).then(newTheme => {
+                this.theme = newTheme;
+                this.config.theme = this.edit_theme;
+
+                this.screen = this.theme.screens[0];
+                this.edit_screen = this.screen.id;
+                this.edit_duration = this.screen.duration || 0;
+                this.edit_background = this.screen.background || '#000000';
+                this.edit_screen_name = this.screen.name || 'n/a';
+                this.active_widgets = [];
+
+                this.theme.screens.forEach(screen => {
+                    screen.widgets.forEach(widget => {
+                        make_widget_table(widget, this.widgets);
+                    });
+                });
+
+                this.unsaved_changes = true;
+            });
         },
         onScreenChange() {
 
@@ -1623,6 +1614,10 @@ export default {
                 acceptLabel: this.t('buttons.clear'),
                 accept: () => {
 
+                    api.clear_image(this.screen.id, widget.id).then(() => {
+                        widget.value = null;
+                        this.unsaved_changes = true;
+                    });
                 },
                 reject: () => {
                 }
@@ -1673,22 +1668,52 @@ export default {
                 // error
             });
         },
+        onAddTheme() {
+            if (!this.theme_manage.name) return;
+            api.theme_create(this.theme_manage.name).then(newTheme => {
+                this.config.theme_list.push(newTheme);
+                this.theme_manage.name = null;
+                this.unsaved_changes = true;
+            });
+        },
+        onDeleteTheme(event, themeToDelete) {
+            this.$confirm.require({
+                target: event.currentTarget,
+                message: this.t('messages.confirmDeleteTheme'),
+                icon: 'pi pi-info-circle',
+                rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+                acceptClass: 'p-button-danger p-button-sm',
+                rejectLabel: this.t('buttons.cancel'),
+                acceptLabel: this.t('buttons.delete'),
+                accept: () => {
+                    api.theme_delete(themeToDelete.config).then(() => {
+                        this.config.theme_list = this.config.theme_list.filter(
+                            t => t.config !== themeToDelete.config
+                        );
+                        this.unsaved_changes = true;
+                    });
+                },
+                reject: () => {}
+            });
+        },
         onSaveTheme() {
-
             return api.theme_save().then(theme => {
-
                 this.unsaved_changes = false;
+                return api.fetch_config().then(config => this.config = config);
             });
         },
         onRevertTheme() {
+            return api.theme_revert().then(response => {
+                this.unsaved_changes = false;
 
-            return api.theme_revert().then(theme => {
+                this.config = response.config;
+                this.theme = response.theme;
+
+                this.edit_theme = this.config.theme;
+                this.screen = this.theme.screens[0];
 
                 this.images_to_delete_on_save = [];
                 this.wallpapers_to_delete_on_save = [];
-
-                this.theme = theme;
-                this.screen = this.theme.screens[0];
 
                 this.edit_orientation = this.theme.orientation;
                 this.edit_refresh = this.theme.refresh;
@@ -1698,14 +1723,11 @@ export default {
                 this.edit_screen_name = this.screen.name || 'n/a';
 
                 this.screen.widgets.forEach(each => {
-
                     make_widget_table(each, this.widgets);
                 });
 
                 this.canvas.width = ('portrait' === this.theme.orientation) ? 170 : 320;
                 this.canvas.height = ('portrait' === this.theme.orientation) ? 320 : 170;
-
-                this.unsaved_changes = false;
             });
         },
         onOpenLED() {

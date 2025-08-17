@@ -16,7 +16,8 @@
     "clear": "Clear",
     "addWidget": "Add Widget",
     "addSensor": "Add Sensor Instance",
-    "addScreen": "Add a New Screen"
+    "addScreen": "Add a New Screen",
+    "addTheme": "Add a New Theme"
   },
   "labels": {
     "active": "Active",
@@ -64,7 +65,7 @@
   "messages": {
     "unsavedChanges": "Unsaved",
     "lostConnection": "Lost Connection",
-    "themeManagementComingSoon": "Theme management coming soon!",
+    "confirmDeleteTheme": "Do you want to delete this theme?",
     "confirmDeleteScreen": "Do you want to delete this screen?",
     "confirmDeleteWidget": "Do you want to delete this widget?",
     "confirmClearWallpaper": "Clear Wallpaper?",
@@ -116,8 +117,6 @@
     },
     "ledStrip": {
       "header": "LED Strip",
-      "speed": "Speed",
-      "intensity": "Intensity",
       "themes": {
         "rainbow": "Rainbow",
         "breathing": "Breathing",
@@ -126,11 +125,6 @@
         "off": "Off",
         "unknown": "n/a"
       }
-    },
-    "confirmations": {
-      "areYouSure": "Are you sure?",
-      "unsavedChanges": "Would you like to save your changes?",
-      "unsavedChangesMessage": "Switching themes will discard any unsaved changes!"
     }
   },
   "card": {
@@ -192,8 +186,6 @@
     }
   },
   "confirmations": {
-    "areYouSure": "Are you sure?",
-    "deleteThemeWarning": "This action will PERMANENTLY DELETE the theme and all associated data, including any uploaded images!",
-    "deleteScreenQuestion": "Do you want to delete this screen?"
+    "areYouSure": "Are you sure?"
   }
 }
