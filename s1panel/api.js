@@ -919,16 +919,16 @@ function switch_theme(context, request) {
         const themePath = request.config;
         read_file(path.join(home_dir, themePath)).then(themeBuffer => {
             const newTheme = JSON.parse(themeBuffer);
-            context.theme = newTheme;
-            context.config.theme = themePath; // Actualiza la ruta del tema activo
+            Object.keys(context.theme).forEach(key => delete context.theme[key]);
+            Object.assign(context.theme, newTheme);
+            context.config.theme = themePath;
 
-            // Reinicia el estado de la pantalla para el nuevo tema
             context.state.update_orientation = true;
             context.state.force_redraw(context.state);
             context.state.screen_index = 0;
             context.state.change_screen = 0;
 
-            set_dirty(context); // Cambiar de tema es un cambio no guardado
+            set_dirty(context);
             fulfill(newTheme);
         }, reject);
     });

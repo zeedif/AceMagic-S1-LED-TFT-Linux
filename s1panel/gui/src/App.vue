@@ -1526,20 +1526,12 @@ export default {
                 this.theme = newTheme;
                 this.config.theme = this.edit_theme;
 
-                this.screen = this.theme.screens[0];
-                this.edit_screen = this.screen.id;
-                this.edit_duration = this.screen.duration || 0;
-                this.edit_background = this.screen.background || '#000000';
-                this.edit_screen_name = this.screen.name || 'n/a';
-                this.active_widgets = [];
+                this.edit_screen = this.theme.screens[0].id;
 
-                this.theme.screens.forEach(screen => {
-                    screen.widgets.forEach(widget => {
-                        make_widget_table(widget, this.widgets);
-                    });
+                this.onScreenChange().then(() => {
+                    this.active_widgets = [];
+                    this.unsaved_changes = true;
                 });
-
-                this.unsaved_changes = true;
             });
         },
         onScreenChange() {
